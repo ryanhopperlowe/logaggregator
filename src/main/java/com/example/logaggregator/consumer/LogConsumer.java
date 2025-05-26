@@ -4,8 +4,16 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import com.example.logaggregator.service.LogProcessingService;
+
 @Service
 public class LogConsumer {
+  
+  private LogProcessingService logProcessingService;
+  
+  public LogConsumer(LogProcessingService logProcessingService) {
+    this.logProcessingService = logProcessingService;
+  }
   
   @KafkaListener(
     id = "logConsumer",
@@ -14,7 +22,6 @@ public class LogConsumer {
     concurrency = "3"
   )
   public void consume(ConsumerRecord<String, String> record) {
-    System.out.printf("🔥 [Thread: %s] Received log: key=%s, value=%s, partition=%d, offset=%d%n",
-      Thread.currentThread().getName(), record.key(), record.value(), record.partition(), record.offset());
+    logProcessingService.processLog(record.value());
   }
 }
